@@ -1,0 +1,23 @@
+{
+  "source": "shipped-outputs",
+  "status": "ok",
+  "description": "Authors' recorded outputs: R/random36.md and data/bcis-3.6.1.csv (seed 2). Not re-executed.",
+  "environment": {
+    "r_version": "3.6.1"
+  },
+  "outputs": {
+    "random_draws": [
+      10,
+      6,
+      5,
+      4,
+      1
+    ],
+    "boot_ci_lower": -0.000525285590361554,
+    "boot_ci_upper": 0.374808960052799
+  },
+  "evidenceFiles": [
+    "R/random36.md",
+    "data/bcis-3.6.1.csv"
+  ]
+}

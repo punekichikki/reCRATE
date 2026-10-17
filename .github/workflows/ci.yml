@@ -1,0 +1,40 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: pip install -e ".[dev]"
+      - name: Unit tests, golden results and planted errors
+        run: python -m unittest discover -s tests -t . -v
+      - name: Example crate still checks and verifies
+        run: |
+          recrate check examples/peikert2021/paper-crate
+          recrate verify examples/peikert2021/paper-crate \
+            --observed examples/peikert2021/work/observed-shipped-3.5.0.json examples/peikert2021/work/observed-shipped-3.6.1.json \
+            --independent examples/peikert2021/work/independent-I1.json \
+            --out /tmp/run-ci --unlocked
+          recrate check /tmp/run-ci
+      - name: Results page builds from the committed crates
+        run: recrate site --out /tmp/site-ci
+
+  rocrate-validator:
+    # Official RO-Crate validator. Informational until our draft rc: terms are settled.
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install roc-validator
+      - run: rocrate-validator validate --no-interactive examples/peikert2021/paper-crate

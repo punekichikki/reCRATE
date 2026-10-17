@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+build/
+dist/
+.pytest_cache/
+
+# Secrets: never commit tokens or keys
+.env
+*.pem
+
+# Local working folders and large downloads (keep committed examples small)
+papers/
+data-cache/
+*.zip
+*.tgz
+*.tar.gz
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
+
+# Built results page (recrate site)
+site/

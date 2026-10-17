@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/recrate/schemas/gap.schema.json",
+  "title": "Gap (entity in a paper crate)",
+  "type": "object",
+  "required": [
+    "@id",
+    "@type",
+    "identifier",
+    "name",
+    "rc:severity",
+    "rc:evidence"
+  ],
+  "properties": {
+    "@id": {
+      "type": "string",
+      "pattern": "^#gap-"
+    },
+    "@type": {
+      "const": "rc:Gap"
+    },
+    "identifier": {
+      "type": "string",
+      "pattern": "^G[0-9]+$"
+    },
+    "name": {
+      "type": "string"
+    },
+    "rc:severity": {
+      "enum": [
+        "environment",
+        "interpretation",
+        "portability",
+        "provenance",
+        "missing-data",
+        "missing-code",
+        "inconsistency"
+      ]
+    },
+    "rc:evidence": {
+      "type": "string"
+    }
+  }
+}

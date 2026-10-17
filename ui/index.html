@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>reCRATE Results</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:ital,opsz,wght@1,6..72,500&display=swap">
+<!--
+  reCRATE results page. Reads real paper crates and run crates; it never computes a verdict.
+  Data comes from data.js (written by `recrate site`) or from crate files opened in the page.
+  Owner: Person 4.
+-->
+<style>
+/* Layout: a verification record. Paper on top, then the run's verdicts, then the evidence behind them. */
+:root{
+  --bg:#F5F6F8; --surface:#FFFFFF; --ink:#141C27; --muted:#586374; --line:#DADFE7;
+  --accent:#1F4FD1; --accent-soft:#E7EDFC; --code-bg:#EEF1F5;
+  --ok:#1C7443; --ok-soft:#E2F2E9; --warn:#935C00; --warn-soft:#FAEFD9; --bad:#AE2A21; --bad-soft:#FAE5E3;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --f-cite:"Newsreader",Georgia,"Times New Roman",serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E131A; --surface:#151C26; --ink:#E5EAF1; --muted:#95A1B3; --line:#273241;
+  --accent:#86A6FF; --accent-soft:#1B2645; --code-bg:#0B1016;
+  --ok:#62CB8F; --ok-soft:#12291C; --warn:#E9B24C; --warn-soft:#2C2311; --bad:#F2867D; --bad-soft:#331816;
+  color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0E131A; --surface:#151C26; --ink:#E5EAF1; --muted:#95A1B3; --line:#273241;
+  --accent:#86A6FF; --accent-soft:#1B2645; --code-bg:#0B1016;
+  --ok:#62CB8F; --ok-soft:#12291C; --warn:#E9B24C; --warn-soft:#2C2311; --bad:#F2867D; --bad-soft:#331816;
+  color-scheme:dark;}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 56px}
+.wrap{max-width:1140px;margin:0 auto;display:grid;gap:22px}
+h1,h2,h3{margin:0;text-wrap:balance}
+a{color:var(--accent)}
+.mono{font-family:var(--f-mono)}
+.label{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.brand h1{font-size:26px;font-weight:600;letter-spacing:-.01em}
+.brand h1 span{color:var(--accent)}
+.tagline{color:var(--muted)}
+.pickers{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+select,.btn{font:inherit;font-size:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:7px 10px}
+.btn{cursor:pointer;font-weight:500}
+.btn:hover{border-color:var(--accent)}
+select:focus-visible,.btn:focus-visible,summary:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;display:grid;gap:12px;min-width:0}
+.paper{grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:24px}
+.cite{font-family:var(--f-cite);font-style:italic;font-size:21px;line-height:1.3;margin:4px 0 6px}
+.meta{color:var(--muted);font-size:13.5px}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:13.5px;align-content:start}
+.facts dt{color:var(--muted)}
+.facts dd{margin:0;min-width:0;overflow-wrap:anywhere}
+
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.t-good{background:var(--ok-soft);color:var(--ok)}
+.t-info{background:var(--accent-soft);color:var(--accent)}
+.t-warn{background:var(--warn-soft);color:var(--warn)}
+.t-bad{background:var(--bad-soft);color:var(--bad)}
+.t-muted{background:var(--code-bg);color:var(--muted)}
+
+.run-head{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:baseline;justify-content:space-between}
+.run-head h2{font-size:18px;font-weight:600}
+.headline{font-size:16px;margin:0;max-width:70ch}
+.counts{display:flex;gap:8px;flex-wrap:wrap}
+
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px;font-variant-numeric:tabular-nums}
+th{text-align:left;font-weight:500;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+td.num{font-family:var(--f-mono);font-size:12.5px}
+.cid{font-family:var(--f-mono);font-size:12px;color:var(--muted);margin-right:6px}
+.sub{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.detail{display:block;color:var(--muted);font-size:12.5px;margin-top:6px;max-width:60ch}
+.chk{display:inline-block;margin-top:6px;font-size:12px}
+
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px;align-items:start}
+.list{display:grid;gap:12px;margin:0;padding:0;list-style:none}
+.list li{display:grid;gap:4px;font-size:14px}
+.list .ev{color:var(--muted);font-size:12.5px}
+.check{border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:grid;gap:6px;font-size:14px}
+.check.fragile{border-color:var(--warn)}
+.check.contradicted{border-color:var(--bad)}
+.check.robust{border-color:var(--ok)}
+h3{font-size:15px;font-weight:600}
+
+details{border-top:1px solid var(--line);padding-top:12px}
+summary{cursor:pointer;font-weight:500}
+pre.json{font-family:var(--f-mono);font-size:12px;line-height:1.55;background:var(--code-bg);border-radius:8px;padding:14px;overflow:auto;max-height:480px;white-space:pre;margin:10px 0 0}
+
+.empty{text-align:center;padding:40px 20px;display:grid;gap:12px;justify-items:center}
+.empty p{margin:0;color:var(--muted);max-width:56ch}
+.notice{font-size:13.5px;color:var(--warn);background:var(--warn-soft);padding:8px 12px;border-radius:8px;margin:0}
+footer{color:var(--muted);font-size:12.5px;border-top:1px solid var(--line);padding-top:14px}
+
+@media (max-width:820px){.paper,.two{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>re<span>CRATE</span></h1>
+      <span class="tagline">Check the paper. Use the method. Keep the record.</span>
+    </div>
+    <div class="pickers">
+      <label class="label" for="paper-select" id="paper-label" hidden>Paper</label>
+      <select id="paper-select" hidden></select>
+      <label class="label" for="run-select" id="run-label" hidden>Run</label>
+      <select id="run-select" hidden></select>
+      <button class="btn" id="open-btn" type="button">Open crate files</button>
+      <input type="file" id="file-input" accept=".json,application/json" multiple hidden>
+    </div>
+  </header>
+
+  <p class="notice" id="error" role="alert" hidden></p>
+
+  <section class="card empty" id="empty" hidden>
+    <h2>No crates loaded</h2>
+    <p>Build this page with <span class="mono">recrate site</span> to include the examples, or open a paper crate and a run crate (<span class="mono">ro-crate-metadata.json</span> files) with the button above.</p>
+  </section>
+
+  <main class="wrap" id="main" hidden>
+    <section class="card paper" aria-labelledby="paper-title">
+      <div>
+        <div class="label">Paper</div>
+        <p class="cite" id="paper-title"></p>
+        <div class="meta" id="paper-meta"></div>
+      </div>
+      <dl class="facts" id="paper-facts"></dl>
+    </section>
+
+    <section class="card" aria-labelledby="run-title">
+      <div class="run-head">
+        <h2 id="run-title">Verification run</h2>
+        <span class="meta" id="run-date"></span>
+      </div>
+      <p class="headline" id="headline"></p>
+      <div class="counts" id="counts"></div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th scope="col">Claim</th><th scope="col">Paper says</th><th scope="col">Observed</th><th scope="col">Tolerance</th><th scope="col">Verdict</th></tr></thead>
+          <tbody id="claims"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="two">
+      <section class="card" aria-labelledby="checks-title">
+        <h3 id="checks-title">Independent checks</h3>
+        <div id="checks" class="list"></div>
+      </section>
+      <section class="card" aria-labelledby="gaps-title">
+        <h3 id="gaps-title">Gaps found in the paper and code</h3>
+        <ul id="gaps" class="list"></ul>
+      </section>
+    </div>
+
+    <section class="card" aria-labelledby="prov-title">
+      <h3 id="prov-title">What ran</h3>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th scope="col">Step</th><th scope="col">Environment</th><th scope="col">Status</th><th scope="col">Result file</th></tr></thead>
+          <tbody id="actions"></tbody>
+        </table>
+      </div>
+      <div id="patches-wrap" hidden>
+        <h3>Changes made to get it running</h3>
+        <ul id="patches" class="list"></ul>
+      </div>
+      <details>
+        <summary>Files in the paper crate</summary>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr><th scope="col">File</th><th scope="col">Origin</th><th scope="col">Licence</th><th scope="col">sha256</th></tr></thead>
+            <tbody id="files"></tbody>
+          </table>
+        </div>
+      </details>
+      <details>
+        <summary>Run crate metadata (ro-crate-metadata.json)</summary>
+        <pre class="json" id="raw"></pre>
+      </details>
+    </section>
+  </main>
+
+  <footer id="footer">Verdicts are computed by <span class="mono">recrate.core.verify</span>. This page only displays them.</footer>
+</div>
+
+<script src="data.js" onerror="window.RECRATE_DATA = window.RECRATE_DATA || null"></script>
+<script>
+(function () {
+  "use strict";
+  var $ = function (id) { return document.getElementById(id); };
+
+  var VERDICTS = {
+    "independently-checked": ["Independently checked", "good"],
+    "reproduced": ["Reproduced", "good"],
+    "reproduced-after-analysis-changes": ["Reproduced after code changes", "warn"],
+    "matches-recorded-outputs": ["Matches recorded outputs", "info"],
+    "near": ["Near", "warn"],
+    "mismatch": ["Does not match", "bad"],
+    "inconsistent-with-recorded-outputs": ["Paper disagrees with recorded outputs", "bad"],
+    "could-not-run": ["Could not run", "muted"],
+    "not-run": ["Not run", "muted"]
+  };
+  var ORDER = Object.keys(VERDICTS);
+  var OUTCOME_TONE = { robust: "good", fragile: "warn", contradicted: "bad" };
+
+  // Build DOM from data with textContent only: crate contents are untrusted.
+  function el(tag, attrs, kids) {
+    var n = document.createElement(tag);
+    if (attrs) Object.keys(attrs).forEach(function (k) {
+      if (k === "text") n.textContent = attrs[k];
+      else if (k === "class") n.className = attrs[k];
+      else n.setAttribute(k, attrs[k]);
+    });
+    (kids || []).forEach(function (c) { if (c != null) n.appendChild(typeof c === "string" ? document.createTextNode(c) : c); });
+    return n;
+  }
+  function clear(n) { while (n.firstChild) n.removeChild(n.firstChild); return n; }
+  function safeUrl(u) { return typeof u === "string" && /^https?:\/\//.test(u) ? u : null; }
+  function link(text, url) { var u = safeUrl(url); return u ? el("a", { href: u, target: "_blank", rel: "noopener", text: text }) : document.createTextNode(text); }
+  function pill(text, tone) { return el("span", { "class": "pill t-" + tone, text: text }); }
+
+  function types(e) { var t = e["@type"]; return Array.isArray(t) ? t : (t ? [t] : []); }
+  function graph(doc) { return (doc && doc["@graph"]) || []; }
+  function index(doc) { var m = {}; graph(doc).forEach(function (e) { m[e["@id"]] = e; }); return m; }
+  function ofType(doc, t) { return graph(doc).filter(function (e) { return types(e).indexOf(t) >= 0; }); }
+  function ref(x) { return x && typeof x === "object" ? x["@id"] : x; }
+
+  function fmtNum(v) {
+    if (typeof v !== "number") return String(v);
+    if (Number.isInteger(v)) return String(v);
+    return String(Number(v.toPrecision(6)));
+  }
+  function fmt(v) {
+    if (v == null) return "—";
+    if (Array.isArray(v)) return v.map(fmtNum).join(", ");
+    return fmtNum(v);
+  }
+  function dateOnly(s) { return typeof s === "string" ? s.slice(0, 10) : ""; }
+
+  // ---------------------------------------------------------------- data
+  var state = { papers: [], paper: 0, run: 0 };
+
+  function load(data) {
+    state.papers = (data && data.papers) || [];
+    state.paper = 0; state.run = 0;
+    if (data && data.generated) $("footer").textContent = "Built by recrate site on " + dateOnly(data.generated) + ". Verdicts are computed by recrate.core.verify; this page only displays them.";
+    render();
+  }
+
+  function fillSelect(sel, label, items, current) {
+    clear(sel);
+    items.forEach(function (it, i) { sel.appendChild(el("option", { value: String(i), text: it })); });
+    sel.value = String(current);
+    var show = items.length > 1;
+    sel.hidden = !show; label.hidden = !show;
+  }
+
+  // ---------------------------------------------------------------- render
+  function render() {
+    $("error").hidden = true;
+    var has = state.papers.length > 0;
+    $("empty").hidden = has; $("main").hidden = !has;
+    fillSelect($("paper-select"), $("paper-label"), state.papers.map(function (p) { return paperName(p); }), state.paper);
+    if (!has) return;
+    var p = state.papers[state.paper];
+    fillSelect($("run-select"), $("run-label"), (p.runs || []).map(function (r) { return r.id; }), state.run);
+    renderPaper(p);
+    renderRun(p, (p.runs || [])[state.run]);
+  }
+
+  function paperName(p) {
+    var idx = index(p.paperCrate);
+    var art = ofType(p.paperCrate, "ScholarlyArticle")[0];
+    return (art && art.name) || (idx["./"] && idx["./"].name) || p.id;
+  }
+
+  function renderPaper(p) {
+    var doc = p.paperCrate, idx = index(doc);
+    var root = idx["./"] || {};
+    var art = ofType(doc, "ScholarlyArticle")[0] || {};
+    var code = ofType(doc, "SoftwareSourceCode").filter(function (e) { return e.codeRepository; })[0];
+    var authors = [].concat(art.author || []).map(function (a) { var e = idx[ref(a)]; return e ? e.name : ""; }).filter(Boolean);
+    $("paper-title").textContent = art.name || root.name || p.id;
+
+    var meta = clear($("paper-meta"));
+    var bits = [authors.join(", "), (art.datePublished || "").slice(0, 4), art.isPartOf && typeof art.isPartOf === "string" ? art.isPartOf : ""].filter(Boolean);
+    meta.appendChild(document.createTextNode(bits.join(" · ")));
+    if (safeUrl(art["@id"])) { meta.appendChild(document.createTextNode(" · ")); meta.appendChild(link(art["@id"].replace(/^https?:\/\/(dx\.)?doi\.org\//, "doi:"), art["@id"])); }
+
+    var facts = clear($("paper-facts"));
+    function fact(k, v) { facts.appendChild(el("dt", { text: k })); facts.appendChild(el("dd", null, [v])); }
+    if (code) fact("Code", el("span", null, [link(code.name || code.codeRepository, code.codeRepository), code.version ? el("span", { "class": "mono", text: " @ " + String(code.version).slice(0, 7) }) : null]));
+    var files = (root.hasPart || []).length;
+    fact("Crate", document.createTextNode(files + " files · " + ofType(doc, "Claim").length + " claims · " + ofType(doc, "rc:Gap").length + " gaps"));
+    var lic = idx[ref(root.license)] || {};
+    if (root.license) fact("Licence", document.createTextNode((lic.name || ref(root.license) || "").replace("https://spdx.org/licenses/", "")));
+    if (p.id) fact("Folder", el("span", { "class": "mono", text: "examples/" + p.id }));
+
+    renderGaps(doc);
+    renderFiles(doc, idx);
+  }
+
+  function renderGaps(doc) {
+    var ul = clear($("gaps"));
+    var gaps = ofType(doc, "rc:Gap");
+    if (!gaps.length) { ul.appendChild(el("li", { "class": "ev", text: "No gaps recorded." })); return; }
+    gaps.forEach(function (g) {
+      ul.appendChild(el("li", null, [
+        el("div", null, [pill(g["rc:severity"] || "gap", "muted"), " ", el("span", { "class": "cid", text: g.identifier || "" }), g.name || ""]),
+        g["rc:evidence"] ? el("span", { "class": "ev", text: "Evidence: " + g["rc:evidence"] }) : null
+      ]));
+    });
+  }
+
+  function renderFiles(doc, idx) {
+    var tb = clear($("files"));
+    var root = idx["./"] || {};
+    (root.hasPart || []).forEach(function (h) {
+      var f = idx[ref(h)] || { "@id": ref(h) };
+      var origin = f.creator ? "added by reCRATE" : (f.isPartOf ? "authors" : "");
+      var lic = String(ref(f.license) || "").replace("https://spdx.org/licenses/", "");
+      tb.appendChild(el("tr", null, [
+        el("td", { "class": "num", text: f["@id"] }),
+        el("td", { text: origin }),
+        el("td", { text: lic }),
+        el("td", { "class": "num", title: f.sha256 || "", text: f.sha256 ? f.sha256.slice(0, 12) + "…" : "—" })
+      ]));
+    });
+  }
+
+  function headline(counts, total) {
+    var get = function (k) { return counts[k] || 0; };
+    var good = get("independently-checked") + get("reproduced");
+    var recorded = get("matches-recorded-outputs");
+    var bad = get("mismatch") + get("inconsistent-with-recorded-outputs");
+    var warn = get("near") + get("reproduced-after-analysis-changes");
+    var idle = get("could-not-run") + get("not-run");
+    if (recorded === total) return "All " + total + " claims match the authors' recorded outputs. Nothing has been re-executed yet, so none count as reproduced.";
+    var one = function (n, single, many) { return n + " " + (n === 1 ? single : many); };
+    var parts = [];
+    if (good) parts.push(good + " reproduced");
+    if (recorded) parts.push(one(recorded, "matches recorded outputs only", "match recorded outputs only"));
+    if (warn) parts.push(one(warn, "needs a closer look", "need a closer look"));
+    if (bad) parts.push(one(bad, "does not match", "do not match"));
+    if (idle) parts.push(one(idle, "was not run", "were not run"));
+    return "Of " + total + " claims: " + parts.join(", ") + ".";
+  }
+
+  function renderRun(p, run) {
+    var tbody = clear($("claims"));
+    var counts = clear($("counts"));
+    var checksBox = clear($("checks"));
+    var actions = clear($("actions"));
+    var patches = clear($("patches"));
+    if (!run) {
+      $("run-title").textContent = "No verification run yet";
+      $("run-date").textContent = "";
+      $("headline").textContent = "This paper crate has no run crate. Run recrate verify to create one.";
+      $("raw").textContent = "";
+      $("patches-wrap").hidden = true;
+      return;
+    }
+    var doc = run.crate, idx = index(doc), root = idx["./"] || {};
+    var claimsDoc = index(p.paperCrate);
+    $("run-title").textContent = run.id;
+    $("run-date").textContent = dateOnly(root.datePublished);
+
+    var verdicts = graph(doc).filter(function (e) { return /^#verdict-/.test(e["@id"] || ""); });
+    var tally = {};
+    verdicts.forEach(function (v) { tally[v.value] = (tally[v.value] || 0) + 1; });
+    $("headline").textContent = headline(tally, verdicts.length);
+    ORDER.forEach(function (k) { if (tally[k]) counts.appendChild(pill(VERDICTS[k][0] + ": " + tally[k], VERDICTS[k][1])); });
+    counts.appendChild(root["rc:claimsLocked"]
+      ? pill("Tolerances locked by " + (root["rc:claimsLockedBy"] || "a person"), "good")
+      : pill("Tolerances not yet locked by a person", "warn"));
+
+    verdicts.forEach(function (v) {
+      var claim = claimsDoc[ref(v.about)] || idx[ref(v.about)] || {};
+      var meta = VERDICTS[v.value] || [v.value, "muted"];
+      var checks = [].concat(v["rc:independentCheck"] || []).map(function (c) { return idx[ref(c)]; }).filter(Boolean);
+      var cell = el("td", null, [
+        el("span", { "class": "cid", text: claim.identifier || "" }),
+        claim.name || v.name || "",
+        claim["rc:claimLocation"] ? el("span", { "class": "sub", text: claim["rc:claimLocation"] }) : null,
+        v["rc:detail"] ? el("span", { "class": "detail", text: v["rc:detail"] }) : null
+      ]);
+      checks.forEach(function (c) {
+        cell.appendChild(el("span", { "class": "chk" }, [pill("Independent check: " + (c["rc:outcome"] || "?"), OUTCOME_TONE[c["rc:outcome"]] || "muted")]));
+      });
+      tbody.appendChild(el("tr", null, [
+        cell,
+        el("td", { "class": "num", text: fmt(v["rc:expectedValue"]) }),
+        el("td", { "class": "num", text: fmt(v["rc:observedValue"]) }),
+        el("td", { text: v["rc:tolerance"] || "" }),
+        el("td", null, [pill(meta[0], meta[1])])
+      ]));
+    });
+
+    var checks = graph(doc).filter(function (e) { return e.additionalType === "rc:IndependentCheck"; });
+    if (!checks.length) checksBox.appendChild(el("p", { "class": "meta", text: "No independent checks in this run." }));
+    checks.forEach(function (c) {
+      var o = c["rc:outcome"] || "";
+      checksBox.appendChild(el("div", { "class": "check " + o }, [
+        el("div", null, [pill(o || "unknown", OUTCOME_TONE[o] || "muted"), " ", el("strong", { text: c.name || "" })]),
+        el("div", { text: c["rc:summary"] || "" }),
+        c.description ? el("div", { "class": "ev", text: "Method: " + c.description }) : null
+      ]));
+    });
+
+    graph(doc).filter(function (e) { return types(e).indexOf("CreateAction") >= 0 && !e.additionalType; }).forEach(function (a) {
+      var env = idx[ref(a.environment)] || {};
+      var ok = !a.actionStatus || /Completed/.test(ref(a.actionStatus) || "");
+      actions.appendChild(el("tr", null, [
+        el("td", null, [a.name || "", a.description ? el("span", { "class": "sub", text: a.description }) : null]),
+        el("td", { text: env.name || "" }),
+        el("td", null, [pill(ok ? "completed" : "failed", ok ? "good" : "bad"), a.error ? el("span", { "class": "sub", text: a.error }) : null]),
+        el("td", { "class": "num", text: ref(a.result) || "" })
+      ]));
+    });
+
+    var ups = graph(doc).filter(function (e) { return types(e).indexOf("UpdateAction") >= 0; });
+    $("patches-wrap").hidden = !ups.length;
+    ups.forEach(function (u) {
+      patches.appendChild(el("li", null, [
+        el("div", null, [pill(u.additionalType || "change", u.additionalType === "analysis" ? "warn" : "muted"), " ", el("span", { "class": "mono", text: u["rc:file"] || u.name || "" })]),
+        u.description ? el("span", { "class": "ev", text: u.description }) : null
+      ]));
+    });
+
+    $("raw").textContent = JSON.stringify(doc, null, 2);
+  }
+
+  // ---------------------------------------------------------------- opening crate files
+  function showError(msg) { var e = $("error"); e.textContent = msg; e.hidden = false; }
+
+  function readFile(f) {
+    return new Promise(function (res, rej) {
+      var r = new FileReader();
+      r.onload = function () { try { res({ name: f.name, json: JSON.parse(r.result) }); } catch (e) { rej(new Error(f.name + " is not valid JSON")); } };
+      r.onerror = function () { rej(new Error("Could not read " + f.name)); };
+      r.readAsText(f);
+    });
+  }
+
+  function isRunCrate(doc) {
+    var root = index(doc)["./"] || {};
+    return [].concat(root.conformsTo || []).some(function (c) { return /wfrun\/process/.test(ref(c) || ""); });
+  }
+
+  $("open-btn").addEventListener("click", function () { $("file-input").click(); });
+  $("file-input").addEventListener("change", function (ev) {
+    var files = Array.prototype.slice.call(ev.target.files || []);
+    if (!files.length) return;
+    Promise.all(files.map(readFile)).then(function (loaded) {
+      var paperDocs = loaded.filter(function (l) { return !isRunCrate(l.json) && ofType(l.json, "Claim").length; });
+      var runDocs = loaded.filter(function (l) { return isRunCrate(l.json); });
+      if (!paperDocs.length && !runDocs.length) { showError("These files are not reCRATE paper crates or run crates."); return; }
+      var paper = paperDocs.length ? paperDocs[0].json : (state.papers[state.paper] || {}).paperCrate;
+      if (!paper) { showError("Open the paper crate together with the run crate, so claims can be shown."); return; }
+      state.papers.push({ id: "opened files", paperCrate: paper,
+        runs: runDocs.map(function (r, i) { return { id: (index(r.json)["./"] || {}).name || ("run " + (i + 1)), crate: r.json }; }) });
+      state.paper = state.papers.length - 1; state.run = 0;
+      render();
+    }).catch(function (e) { showError(e.message); });
+    ev.target.value = "";
+  });
+
+  $("paper-select").addEventListener("change", function (e) { state.paper = Number(e.target.value); state.run = 0; render(); });
+  $("run-select").addEventListener("change", function (e) { state.run = Number(e.target.value); render(); });
+
+  load(window.RECRATE_DATA || null);
+})();
+</script>
+</body>
+</html>

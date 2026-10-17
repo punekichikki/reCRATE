@@ -1,0 +1,215 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/recrate/schemas/claim.schema.json",
+  "title": "Claim (entity in a paper crate)",
+  "description": "One checkable result from the paper. Written by the Paper Analysis agent; tolerances locked by a person (gate 1).",
+  "type": "object",
+  "required": [
+    "@id",
+    "@type",
+    "identifier",
+    "name",
+    "rc:claimLocation",
+    "rc:comparison",
+    "rc:tolerance",
+    "rc:toleranceSetBy"
+  ],
+  "properties": {
+    "@id": {
+      "type": "string",
+      "pattern": "^#claim-"
+    },
+    "@type": {
+      "anyOf": [
+        {
+          "const": "Claim"
+        },
+        {
+          "type": "array",
+          "contains": {
+            "const": "Claim"
+          }
+        }
+      ]
+    },
+    "identifier": {
+      "type": "string",
+      "pattern": "^C[0-9]+$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 5,
+      "description": "The claim in one sentence, with its number."
+    },
+    "rc:claimLocation": {
+      "type": "string",
+      "description": "Table, figure, page or manuscript line."
+    },
+    "rc:dataType": {
+      "enum": [
+        "tabular",
+        "image",
+        "simulation"
+      ],
+      "default": "tabular"
+    },
+    "rc:expectedValue": {
+      "description": "Number, list of numbers, or (for derived) a readable condition."
+    },
+    "rc:comparison": {
+      "enum": [
+        "exact",
+        "rounded",
+        "abs",
+        "rel",
+        "distribution",
+        "derived"
+      ]
+    },
+    "rc:tolerance": {
+      "type": "string",
+      "description": "Human-readable tolerance, shown beside the verdict."
+    },
+    "rc:toleranceValue": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Numeric tolerance for abs and rel."
+    },
+    "rc:decimalPlaces": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "rc:interval": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "exclusiveMaximum": 1,
+      "default": 0.95
+    },
+    "rc:toleranceSetBy": {
+      "type": "string"
+    },
+    "rc:requiresEnvironment": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "rc:outputKey": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        }
+      ]
+    },
+    "rc:producedBy": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      ],
+      "description": "Script(s) in the crate that produce this output; analysis patches to them downgrade the verdict."
+    },
+    "rc:condition": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "claim",
+          "op",
+          "value"
+        ],
+        "properties": {
+          "claim": {
+            "type": "string",
+            "pattern": "^C[0-9]+$"
+          },
+          "index": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "op": {
+            "enum": [
+              ">",
+              ">=",
+              "<",
+              "<=",
+              "==",
+              "!="
+            ]
+          },
+          "value": {
+            "type": "number"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "rc:comparison": {
+            "const": "derived"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "rc:condition"
+        ]
+      },
+      "else": {
+        "required": [
+          "rc:expectedValue",
+          "rc:outputKey"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "rc:comparison": {
+            "const": "rounded"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "rc:decimalPlaces"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "rc:comparison": {
+            "enum": [
+              "abs",
+              "rel"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "rc:toleranceValue"
+        ]
+      }
+    }
+  ]
+}

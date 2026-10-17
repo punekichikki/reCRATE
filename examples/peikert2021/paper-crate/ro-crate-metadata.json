@@ -1,0 +1,626 @@
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.2/context",
+    "https://w3id.org/ro/terms/workflow-run/context",
+    {
+      "rc": "https://example.org/recrate/terms#",
+      "Claim": "http://schema.org/Claim",
+      "appearance": "http://schema.org/appearance"
+    }
+  ],
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.2"
+      },
+      "about": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "name": "Paper crate: Peikert & Brandmaier (2021), reproducible R workflow",
+      "description": "Inputs, code, recorded outputs, claims and gaps for verifying the R-version examples in Peikert & Brandmaier (2021).",
+      "datePublished": "2026-10-17",
+      "license": {
+        "@id": "https://spdx.org/licenses/CC-BY-4.0"
+      },
+      "conformsTo": {
+        "@id": "#recrate-profile"
+      },
+      "isBasedOn": [
+        {
+          "@id": "https://doi.org/10.5964/qcmb.3763"
+        },
+        {
+          "@id": "https://github.com/aaronpeikert/reproducible-research"
+        }
+      ],
+      "hasPart": [
+        {
+          "@id": "Dockerfile"
+        },
+        {
+          "@id": "Makefile"
+        },
+        {
+          "@id": "manuscript.Rmd"
+        },
+        {
+          "@id": "R/random.R"
+        },
+        {
+          "@id": "R/bootstrap.R"
+        },
+        {
+          "@id": "R/bootstrap-data.R"
+        },
+        {
+          "@id": "R/random35.md"
+        },
+        {
+          "@id": "R/random36.md"
+        },
+        {
+          "@id": "R/bootstrap35.md"
+        },
+        {
+          "@id": "R/bootstrap36.md"
+        },
+        {
+          "@id": "data/pathological-example2.csv"
+        },
+        {
+          "@id": "data/bcis-3.5.0.csv"
+        },
+        {
+          "@id": "data/bcis-3.6.1.csv"
+        },
+        {
+          "@id": "repro/run_claims.R"
+        }
+      ],
+      "mentions": [
+        {
+          "@id": "#claim-C1"
+        },
+        {
+          "@id": "#claim-C2"
+        },
+        {
+          "@id": "#claim-C3"
+        },
+        {
+          "@id": "#claim-C4"
+        },
+        {
+          "@id": "#claim-C5"
+        },
+        {
+          "@id": "#gap-G1"
+        },
+        {
+          "@id": "#gap-G2"
+        },
+        {
+          "@id": "#gap-G3"
+        },
+        {
+          "@id": "#gap-G4"
+        },
+        {
+          "@id": "#gap-G5"
+        },
+        {
+          "@id": "#input-contract"
+        }
+      ],
+      "mainEntity": {
+        "@id": "R/bootstrap.R"
+      }
+    },
+    {
+      "@id": "Dockerfile",
+      "@type": "File",
+      "name": "Dockerfile",
+      "description": "Authors' container recipe (rocker/verse:3.6.1 + MRAN snapshot 2020-01-01)",
+      "encodingFormat": "text/plain",
+      "contentSize": "725",
+      "sha256": "8f28c9836ff4ed6f7b91f3ed7c42dc98e44860c1916e46ed6bc0d932e8b6ec84",
+      "isPartOf": {
+        "@id": "https://github.com/aaronpeikert/reproducible-research"
+      },
+      "license": {
+        "@id": "https://spdx.org/licenses/CC-BY-4.0"
+      }
+    },
+    {
+      "@id": "Makefile",
+      "@type": "File",
+      "name": "Makefile",
+      "description": "Authors' build recipe: make build, make all DOCKER=TRUE",
+      "encodingFormat": "text/x-makefile",
+      "contentSize": "2765",
+      "sha256": "947530b3563af79a93b8ea262a0d460dd411adf699941e2e17b3789fdc7bf55e",
+      "isPartOf": {
+        "@id": "https://github.com/aaronpeikert/reproducible-research"
+      },
+      "license": {
+        "@id": "https://spdx.org/licenses/CC-BY-4.0"
+      }
+    },
+    {
+      "@id": "manuscript.Rmd",
+      "@type": "File",
+      "name": "manuscript.Rmd",
+      "description": "Authors' R Markdown manuscript; claims C1-C5 are in lines 192-233",
+      "encodingFormat": "text/markdown",
+      "contentSize": "54186",
+      "sha256": "e477a267480898d3f2060e00b50c1441a75b2726bac50a2036c77b3fa1a855c0",
+      "isPartOf": {
+        "@id": "https://github.com/aaronpeikert/reproducible-research"
+      },
+      "license": {
+        "@id": "https://spdx.org/licenses/CC-BY-4.0"
+      }
+    },
+    {
+      "@id": "R/random.R",
+      "@type": "File",
+      "name": "random.R",
+      "description": "Seeded sample(1:10, 5) example",
+      "encodingFormat": "text/x-r",
+      "contentSize": "72",
+      "sha256": "c5d31a7cb9d15587571a5643e62043a37eea8c45282eb9bbe526c84809a0aa4d",
+      "isPartOf": {
+        "@id": "https://github.com/aaronpeikert/reproducible-research"
+      },
+      "license": {
+        "@id": "https://spdx.org/licenses/CC-BY-4.0"
+      }
+    },
+    {
+      "@id": "R/bootstrap.R",
+      "@type": "File",
+      "name": "bootstrap.R",
+      "description": "Bootstrap BCa CI for the regression slope; selects the seed",
+      "encodingFormat": "text/x-r",
+      "contentSize": "1336",
+      "sha256": "6ed83babb5405d43b158d54462a15dfdf697d4694127c4924a75fb3af112087c",
+      "isPartOf": {
+        "@id": "https://github.com/aaronpeikert/reproducible-research"
+      },
+      "license": {
+        "@id": "https://spdx.org/licenses/CC-BY-4.0"
+      }
+    },
+    {
+      "@id": "R/bootstrap-data.R",
+      "@type": "File",
+      "name": "bootstrap-data.R",
+      "description": "Generates the simulated data set (true slope 0.225, n = 100)",
+      "encodingFormat": "text/x-r",
+      "contentSize": "378",
+      "sha256": "c8f50da1a12ca0aa4dd8979916a974c8b64372541d46acf1f85ced9fae7d42da",
+      "isPartOf": {
+        "@id": "https://github.com/aaronpeikert/reproducible-research"
+      },
+      "license": {
+        "@id": "https://spdx.org/licenses/CC-BY-4.0"
+      }
+    },
+    {
+      "@id": "R/random35.md",
+      "@type": "File",
+      "name": "random35.md",
+      "description": "Authors' recorded output of random.R under R 3.5.0",
+      "encodingFormat": "text/markdown",
+      "contentSize": "64",
+      "sha256": "3841accc26c0ea244412b2c96ccf41a321b994f5efd210aa6853f2f018739590",
+      "isPartOf": {
+        "@id": "https://github.com/aaronpeikert/reproducible-research"
+      },
+      "license": {
+        "@id": "https://spdx.org/licenses/CC-BY-4.0"
+      }
+    },
+    {
+      "@id": "R/random36.md",
+      "@type": "File",
+      "name": "random36.md",
+      "description": "Authors' recorded output of random.R under R 3.6.1",
+      "encodingFormat": "text/markdown",
+      "contentSize": "69",
+      "sha256": "a43ae03caa6c0baec55f8d0e85857f7d7a770d0da16b8486dfb9c770f275c136",
+      "isPartOf": {
+        "@id": "https://github.com/aaronpeikert/reproducible-research"
+      },
+      "license": {
+        "@id": "https://spdx.org/licenses/CC-BY-4.0"
+      }
+    },
+    {
+      "@id": "R/bootstrap35.md",
+      "@type": "File",
+      "name": "bootstrap35.md",
+      "description": "Authors' recorded output of bootstrap.R under R 3.5.0",
+      "encodingFormat": "text/markdown",
+      "contentSize": "86",
+      "sha256": "4012a1f308995ebaaf35dd0252a3ded309dda43334d9c29d1a4a2c88a84e9d9b",
+      "isPartOf": {
+        "@id": "https://github.com/aaronpeikert/reproducible-research"
+      },
+      "license": {
+        "@id": "https://spdx.org/licenses/CC-BY-4.0"
+      }
+    },
+    {
+      "@id": "R/bootstrap36.md",
+      "@type": "File",
+      "name": "bootstrap36.md",
+      "description": "Authors' recorded output of bootstrap.R under R 3.6.1",
+      "encodingFormat": "text/markdown",
+      "contentSize": "90",
+      "sha256": "4ba34f6c06a4a3eca05e7eb81d22a5959952a78c0a670785c9b3492832a6dbcd",
+      "isPartOf": {
+        "@id": "https://github.com/aaronpeikert/reproducible-research"
+      },
+      "license": {
+        "@id": "https://spdx.org/licenses/CC-BY-4.0"
+      }
+    },
+    {
+      "@id": "data/pathological-example2.csv",
+      "@type": "File",
+      "name": "pathological-example2.csv",
+      "description": "Simulated data: columns x, y; 100 rows",
+      "encodingFormat": "text/csv",
+      "contentSize": "1098",
+      "sha256": "bc7019ecc924d2fc2de9aeebc04fda16f3387e1cd2516c6b7b32f14cb9ea48fc",
+      "isPartOf": {
+        "@id": "https://github.com/aaronpeikert/reproducible-research"
+      },
+      "license": {
+        "@id": "https://spdx.org/licenses/CC-BY-4.0"
+      }
+    },
+    {
+      "@id": "data/bcis-3.5.0.csv",
+      "@type": "File",
+      "name": "bcis-3.5.0.csv",
+      "description": "Authors' precomputed BCa CIs for seeds 1-10 under R 3.5.0",
+      "encodingFormat": "text/csv",
+      "contentSize": "527",
+      "sha256": "35236b4833253d268f3a66dbb99d43828fdb6cd1a9f45f4c35f055e88ae96628",
+      "isPartOf": {
+        "@id": "https://github.com/aaronpeikert/reproducible-research"
+      },
+      "license": {
+        "@id": "https://spdx.org/licenses/CC-BY-4.0"
+      }
+    },
+    {
+      "@id": "data/bcis-3.6.1.csv",
+      "@type": "File",
+      "name": "bcis-3.6.1.csv",
+      "description": "Authors' precomputed BCa CIs for seeds 1-10 under R 3.6.1",
+      "encodingFormat": "text/csv",
+      "contentSize": "529",
+      "sha256": "b497bd839d926c9b510d8ec3d7a57858ce36f3de9671941f1d3f3a52ef0ac374",
+      "isPartOf": {
+        "@id": "https://github.com/aaronpeikert/reproducible-research"
+      },
+      "license": {
+        "@id": "https://spdx.org/licenses/CC-BY-4.0"
+      }
+    },
+    {
+      "@id": "repro/run_claims.R",
+      "@type": "File",
+      "name": "run_claims.R",
+      "description": "Runner added by reCRATE: re-executes the claim computations and writes observed values as JSON",
+      "encodingFormat": "text/x-r",
+      "contentSize": "2104",
+      "sha256": "5b6839ba232403fdd9cbc4f0bde150d54bc73c8ffe6389dc2c20f599275f6f56",
+      "creator": {
+        "@id": "#recrate-agent"
+      },
+      "license": {
+        "@id": "https://spdx.org/licenses/MIT"
+      }
+    },
+    {
+      "@id": "#claim-C1",
+      "@type": "Claim",
+      "identifier": "C1",
+      "name": "set.seed(1234); sample(1:10, 5) returns 2 6 5 8 9 under R 3.5.0",
+      "rc:claimLocation": "manuscript.Rmd l.196-210 (seed example, R 3.5.0)",
+      "rc:dataType": "tabular",
+      "rc:toleranceSetBy": "proposed by analysis (manual, with Claude) from reported precision; awaiting confirmation",
+      "appearance": {
+        "@id": "https://doi.org/10.5964/qcmb.3763"
+      },
+      "creator": {
+        "@id": "#recrate-agent"
+      },
+      "rc:expectedValue": [
+        2,
+        6,
+        5,
+        8,
+        9
+      ],
+      "rc:comparison": "exact",
+      "rc:tolerance": "exact match",
+      "rc:requiresEnvironment": {
+        "r_version": "3.5.0"
+      },
+      "rc:outputKey": "random_draws",
+      "rc:producedBy": "R/random.R"
+    },
+    {
+      "@id": "#claim-C2",
+      "@type": "Claim",
+      "identifier": "C2",
+      "name": "set.seed(1234); sample(1:10, 5) returns 10 6 5 4 1 under R 3.6.1",
+      "rc:claimLocation": "manuscript.Rmd l.210-220 (seed example, R 3.6.1)",
+      "rc:dataType": "tabular",
+      "rc:toleranceSetBy": "proposed by analysis (manual, with Claude) from reported precision; awaiting confirmation",
+      "appearance": {
+        "@id": "https://doi.org/10.5964/qcmb.3763"
+      },
+      "creator": {
+        "@id": "#recrate-agent"
+      },
+      "rc:expectedValue": [
+        10,
+        6,
+        5,
+        4,
+        1
+      ],
+      "rc:comparison": "exact",
+      "rc:tolerance": "exact match",
+      "rc:requiresEnvironment": {
+        "r_version": "3.6.1"
+      },
+      "rc:outputKey": "random_draws",
+      "rc:producedBy": "R/random.R"
+    },
+    {
+      "@id": "#claim-C3",
+      "@type": "Claim",
+      "identifier": "C3",
+      "name": "Bootstrap 95% BCa CI for the slope is 0.0097 to 0.3842 under R 3.5.0",
+      "rc:claimLocation": "manuscript.Rmd l.220-227 (bootstrap example, R 3.5.0)",
+      "rc:dataType": "tabular",
+      "rc:toleranceSetBy": "proposed by analysis (manual, with Claude) from reported precision; awaiting confirmation",
+      "appearance": {
+        "@id": "https://doi.org/10.5964/qcmb.3763"
+      },
+      "creator": {
+        "@id": "#recrate-agent"
+      },
+      "rc:expectedValue": [
+        0.0097,
+        0.3842
+      ],
+      "rc:comparison": "rounded",
+      "rc:decimalPlaces": 4,
+      "rc:tolerance": "equal after rounding to 4 decimals (as reported)",
+      "rc:requiresEnvironment": {
+        "r_version": "3.5.0"
+      },
+      "rc:outputKey": [
+        "boot_ci_lower",
+        "boot_ci_upper"
+      ],
+      "rc:producedBy": "R/bootstrap.R"
+    },
+    {
+      "@id": "#claim-C4",
+      "@type": "Claim",
+      "identifier": "C4",
+      "name": "Bootstrap 95% BCa CI for the slope is -0.0005 to 0.3748 under R 3.6.1",
+      "rc:claimLocation": "manuscript.Rmd l.228-233 (bootstrap example, R 3.6.1)",
+      "rc:dataType": "tabular",
+      "rc:toleranceSetBy": "proposed by analysis (manual, with Claude) from reported precision; awaiting confirmation",
+      "appearance": {
+        "@id": "https://doi.org/10.5964/qcmb.3763"
+      },
+      "creator": {
+        "@id": "#recrate-agent"
+      },
+      "rc:expectedValue": [
+        -0.0005,
+        0.3748
+      ],
+      "rc:comparison": "rounded",
+      "rc:decimalPlaces": 4,
+      "rc:tolerance": "equal after rounding to 4 decimals (as reported)",
+      "rc:requiresEnvironment": {
+        "r_version": "3.6.1"
+      },
+      "rc:outputKey": [
+        "boot_ci_lower",
+        "boot_ci_upper"
+      ],
+      "rc:producedBy": "R/bootstrap.R"
+    },
+    {
+      "@id": "#claim-C5",
+      "@type": "Claim",
+      "identifier": "C5",
+      "name": "The CI excludes zero under R 3.5.0 but includes zero under R 3.6.1, so the conclusion changes with the R version",
+      "rc:claimLocation": "manuscript.Rmd l.220-233 (text around the bootstrap example)",
+      "rc:dataType": "tabular",
+      "rc:toleranceSetBy": "proposed by analysis (manual, with Claude) from reported precision; awaiting confirmation",
+      "appearance": {
+        "@id": "https://doi.org/10.5964/qcmb.3763"
+      },
+      "creator": {
+        "@id": "#recrate-agent"
+      },
+      "rc:expectedValue": "lower(R 3.5.0) > 0 and lower(R 3.6.1) <= 0",
+      "rc:comparison": "derived",
+      "rc:tolerance": "logical condition on C3 and C4",
+      "rc:condition": [
+        {
+          "claim": "C3",
+          "index": 0,
+          "op": ">",
+          "value": 0
+        },
+        {
+          "claim": "C4",
+          "index": 0,
+          "op": "<=",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "@id": "#gap-G1",
+      "@type": "rc:Gap",
+      "identifier": "G1",
+      "name": "Dockerfile installs packages from Microsoft MRAN (mran.microsoft.com/snapshot/2020-01-01). MRAN was retired in 2023, so 'make build' is expected to fail as written.",
+      "rc:severity": "environment",
+      "rc:evidence": "Dockerfile line 3; not yet confirmed by a build",
+      "creator": {
+        "@id": "#recrate-agent"
+      }
+    },
+    {
+      "@id": "#gap-G2",
+      "@type": "rc:Gap",
+      "identifier": "G2",
+      "name": "The bootstrap seed is selected by search: bootstrap.R picks the first seed whose CI excludes zero in R 3.5.0 but not in R 3.6.1 (seed 2). The reported pair is a chosen illustration.",
+      "rc:severity": "interpretation",
+      "rc:evidence": "R/bootstrap.R, section find-seed",
+      "creator": {
+        "@id": "#recrate-agent"
+      }
+    },
+    {
+      "@id": "#gap-G3",
+      "@type": "rc:Gap",
+      "identifier": "G3",
+      "name": "The data are simulated to be borderline (file named pathological-example2; true slope 0.225, n = 100).",
+      "rc:severity": "interpretation",
+      "rc:evidence": "R/bootstrap-data.R",
+      "creator": {
+        "@id": "#recrate-agent"
+      }
+    },
+    {
+      "@id": "#gap-G4",
+      "@type": "rc:Gap",
+      "identifier": "G4",
+      "name": "Makefile hard-codes a Windows path when WINDOWS=TRUE.",
+      "rc:severity": "portability",
+      "rc:evidence": "Makefile line 5",
+      "creator": {
+        "@id": "#recrate-agent"
+      }
+    },
+    {
+      "@id": "#gap-G5",
+      "@type": "rc:Gap",
+      "identifier": "G5",
+      "name": "Crate built from the repository's latest commit; the paper cites commit c4213f6.",
+      "rc:severity": "provenance",
+      "rc:evidence": "https://github.com/aaronpeikert/reproducible-research/commit/12d9969c4d8745bb947b9aed765f5451cdaf999b",
+      "creator": {
+        "@id": "#recrate-agent"
+      }
+    },
+    {
+      "@id": "https://doi.org/10.5964/qcmb.3763",
+      "@type": "ScholarlyArticle",
+      "name": "A Reproducible Data Analysis Workflow With R Markdown, Git, Make, and Docker",
+      "author": [
+        {
+          "@id": "https://orcid.org/0000-0001-7813-818X"
+        },
+        {
+          "@id": "https://orcid.org/0000-0001-8765-6982"
+        }
+      ],
+      "datePublished": "2021-05-11",
+      "isPartOf": "Quantitative and Computational Methods in Behavioral Sciences 1(1)",
+      "license": {
+        "@id": "https://spdx.org/licenses/CC-BY-4.0"
+      }
+    },
+    {
+      "@id": "https://orcid.org/0000-0001-7813-818X",
+      "@type": "Person",
+      "name": "Aaron Peikert"
+    },
+    {
+      "@id": "https://orcid.org/0000-0001-8765-6982",
+      "@type": "Person",
+      "name": "Andreas M. Brandmaier"
+    },
+    {
+      "@id": "https://github.com/aaronpeikert/reproducible-research",
+      "@type": "SoftwareSourceCode",
+      "name": "reproducible-research",
+      "codeRepository": "https://github.com/aaronpeikert/reproducible-research",
+      "version": "12d9969c4d8745bb947b9aed765f5451cdaf999b",
+      "license": {
+        "@id": "https://spdx.org/licenses/CC-BY-4.0"
+      },
+      "programmingLanguage": {
+        "@id": "#lang-r"
+      }
+    },
+    {
+      "@id": "#lang-r",
+      "@type": "ComputerLanguage",
+      "name": "R",
+      "url": {
+        "@id": "https://www.r-project.org/"
+      }
+    },
+    {
+      "@id": "#image-rocker-verse-3.6.1",
+      "@type": "ContainerImage",
+      "name": "rocker/verse",
+      "tag": "3.6.1",
+      "registry": "docker.io",
+      "description": "Base image named in the authors' Dockerfile"
+    },
+    {
+      "@id": "#input-contract",
+      "@type": "rc:InputContract",
+      "name": "Data accepted for reuse",
+      "description": "CSV with numeric columns x (predictor) and y (outcome), one row per observation, no missing values. Method: OLS slope of y on x with a 95% BCa bootstrap CI (1,000 resamples).",
+      "rc:requiredColumns": [
+        "x",
+        "y"
+      ],
+      "rc:columnTypes": {
+        "x": "numeric",
+        "y": "numeric"
+      }
+    },
+    {
+      "@id": "#recrate-agent",
+      "@type": "SoftwareApplication",
+      "name": "reCRATE analysis (manual, with Claude)",
+      "description": "Extracted claims and gaps from the paper and repository; added repro/run_claims.R"
+    },
+    {
+      "@id": "#recrate-profile",
+      "@type": [
+        "CreativeWork",
+        "Profile"
+      ],
+      "name": "reCRATE profile (draft 0.1): claims, gaps, input contract, verdicts"
+    }
+  ]
+}

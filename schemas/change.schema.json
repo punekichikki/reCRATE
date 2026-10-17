@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/recrate/schemas/change.schema.json",
+  "title": "Changes proposed during transfer",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "kind",
+      "target",
+      "description"
+    ],
+    "properties": {
+      "kind": {
+        "type": "string",
+        "description": "See CHANGE_RULES in recrate/core/classify.py"
+      },
+      "target": {
+        "type": "string"
+      },
+      "description": {
+        "type": "string"
+      },
+      "class": {
+        "enum": [
+          "routine",
+          "warning",
+          "meaning-changing"
+        ]
+      },
+      "approval": {
+        "type": "object",
+        "required": [
+          "decision",
+          "by",
+          "reason"
+        ],
+        "properties": {
+          "decision": {
+            "enum": [
+              "approve",
+              "keep-original"
+            ]
+          },
+          "by": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

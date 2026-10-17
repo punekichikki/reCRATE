@@ -1,0 +1,23 @@
+{
+  "source": "shipped-outputs",
+  "status": "ok",
+  "description": "Authors' recorded outputs: R/random35.md and data/bcis-3.5.0.csv (seed 2). Not re-executed.",
+  "environment": {
+    "r_version": "3.5.0"
+  },
+  "outputs": {
+    "random_draws": [
+      2,
+      6,
+      5,
+      8,
+      9
+    ],
+    "boot_ci_lower": 0.00965348571024079,
+    "boot_ci_upper": 0.384222170634806
+  },
+  "evidenceFiles": [
+    "R/random35.md",
+    "data/bcis-3.5.0.csv"
+  ]
+}

@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- Mockup with simulated data. Person 4 will wire this page to real run crates (see docs/IMPLEMENTATION_PLAN.md). -->
+<title>reCRATE Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Newsreader:ital,opsz,wght@1,6..72,500&display=swap">
+<style>
+[hidden]{display:none!important}
+html,body{margin:0}
+/* Layout: a verification bench. Paper + crate on top, mode tabs, then run log beside per-claim verdicts. */
+:root{
+  --bg:#F5F6F8; --surface:#FFFFFF; --ink:#141C27; --muted:#586374; --line:#DADFE7;
+  --accent:#1F4FD1; --accent-soft:#E7EDFC; --code-bg:#EEF1F5;
+  --ok:#1C7443; --ok-soft:#E2F2E9; --warn:#935C00; --warn-soft:#FAEFD9; --bad:#AE2A21; --bad-soft:#FAE5E3;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --f-cite:"Newsreader",Georgia,"Times New Roman",serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E131A; --surface:#151C26; --ink:#E5EAF1; --muted:#95A1B3; --line:#273241;
+  --accent:#86A6FF; --accent-soft:#1B2645; --code-bg:#0B1016;
+  --ok:#62CB8F; --ok-soft:#12291C; --warn:#E9B24C; --warn-soft:#2C2311; --bad:#F2867D; --bad-soft:#331816;
+  color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0E131A; --surface:#151C26; --ink:#E5EAF1; --muted:#95A1B3; --line:#273241;
+  --accent:#86A6FF; --accent-soft:#1B2645; --code-bg:#0B1016;
+  --ok:#62CB8F; --ok-soft:#12291C; --warn:#E9B24C; --warn-soft:#2C2311; --bad:#F2867D; --bad-soft:#331816;
+  color-scheme:dark;}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 56px}
+.wrap{max-width:1140px;margin:0 auto;display:grid;gap:22px}
+h1,h2,h3{margin:0;text-wrap:balance}
+.mono{font-family:var(--f-mono)}
+.label{font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:500}
+header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:10px}
+.brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.brand h1{font-size:26px;font-weight:600;letter-spacing:-.01em}
+.brand h1 span{color:var(--accent)}
+.tagline{color:var(--muted);font-size:15px}
+.demo-note{font-size:12.5px;color:var(--warn);background:var(--warn-soft);padding:4px 10px;border-radius:999px}
+
+.paper{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:24px}
+.cite{font-family:var(--f-cite);font-style:italic;font-size:21px;line-height:1.3;margin:6px 0 8px}
+.meta{color:var(--muted);font-size:13.5px}
+.tree{font-family:var(--f-mono);font-size:12.5px;background:var(--code-bg);border-radius:8px;padding:12px 14px;line-height:1.75;overflow-x:auto;white-space:pre;margin-top:6px}
+.tree b{color:var(--accent);font-weight:500}
+.tree i{color:var(--muted);font-style:normal}
+
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.tab{font:inherit;font-weight:500;background:none;border:0;padding:10px 16px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab:focus-visible,.btn:focus-visible,.switch input:focus-visible+span{outline:2px solid var(--accent);outline-offset:2px}
+.tab small{display:block;font-weight:400;font-size:12px}
+
+.intro{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+.intro p{margin:0;max-width:62ch;color:var(--muted)}
+.intro p strong{color:var(--ink);font-weight:600}
+.controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.btn{font:inherit;font-weight:600;font-size:14.5px;border-radius:8px;padding:10px 18px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:var(--surface)}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn[disabled]{opacity:.5;cursor:default}
+.switch{display:flex;align-items:center;gap:8px;font-size:13.5px;cursor:pointer;user-select:none}
+.switch input{position:absolute;opacity:0;width:1px;height:1px}
+.switch span{width:34px;height:20px;border-radius:999px;background:var(--line);position:relative;flex:none;transition:background .15s}
+.switch span::after{content:"";position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:var(--surface);transition:transform .15s}
+.switch input:checked+span{background:var(--bad)}
+.switch input:checked+span::after{transform:translateX(14px)}
+
+.bench{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:18px;align-items:start}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:12px;min-width:0}
+.panel-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.panel h2{font-size:16px;font-weight:600}
+.log{font-family:var(--f-mono);font-size:12.5px;line-height:1.6;background:var(--code-bg);border-radius:8px;padding:12px;min-height:300px;max-height:460px;overflow:auto}
+.log .ln{display:grid;grid-template-columns:62px minmax(0,1fr);gap:8px;padding:1px 0}
+.log .tag{color:var(--muted)}
+.log .run .tag{color:var(--muted)}
+.log .agent .tag{color:var(--accent)}
+.log .agent .txt{color:var(--accent)}
+.log .ok .tag,.log .ok .txt{color:var(--ok)}
+.log .warn .tag,.log .warn .txt{color:var(--warn)}
+.log .err .tag,.log .err .txt{color:var(--bad)}
+.log .empty{color:var(--muted);font-family:var(--f-body);font-size:13.5px}
+
+.summary{display:flex;gap:8px;flex-wrap:wrap}
+.pill{font-size:12.5px;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--code-bg);color:var(--muted);font-variant-numeric:tabular-nums}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.5px;font-variant-numeric:tabular-nums}
+th{text-align:left;font-weight:500;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+td.num{font-family:var(--f-mono);font-size:12.5px;white-space:nowrap}
+tr.tampered td.exp{color:var(--bad);font-weight:500}
+.where{color:var(--muted);font-size:12.5px;display:block}
+.verdict{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.v-ok{background:var(--ok-soft);color:var(--ok)}.v-warn{background:var(--warn-soft);color:var(--warn)}.v-bad{background:var(--bad-soft);color:var(--bad)}.v-pend{background:var(--code-bg);color:var(--muted)}
+.explain{margin:0;padding:12px 14px;border-radius:8px;font-size:13.5px;border:1px solid var(--line)}
+.explain .who{font-weight:600;color:var(--accent);font-size:12.5px;display:block;margin-bottom:2px}
+.explain.bad{border-color:var(--bad)}
+.explain.warn{border-color:var(--warn)}
+
+.ledger{display:grid;gap:8px}
+.ledger-row{display:grid;grid-template-columns:auto minmax(0,1fr);gap:10px;font-size:13.5px;align-items:start}
+.kind{font-family:var(--f-mono);font-size:11px;font-weight:500;padding:2px 7px;border-radius:5px;background:var(--accent-soft);color:var(--accent);margin-top:2px}
+.kind.none{background:var(--ok-soft);color:var(--ok)}
+.ledger-row p{margin:0}
+.ledger-row small{color:var(--muted);display:block}
+
+.contract td:first-child{font-weight:500}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stat{border:1px solid var(--line);border-radius:8px;padding:10px 12px}
+.stat .n{font-size:22px;font-weight:600;font-variant-numeric:tabular-nums}
+.stat .d{font-size:12.5px;color:var(--muted)}
+.hint{font-size:13px;color:var(--muted);margin:0}
+
+.json{font-family:var(--f-mono);font-size:12px;line-height:1.55;background:var(--code-bg);border-radius:8px;padding:14px;overflow:auto;max-height:560px;white-space:pre;margin:0}
+.json .k{color:var(--accent)}.json .s{color:var(--ok)}.json .n{color:var(--warn)}
+.copy-status{font-size:12.5px;color:var(--muted)}
+
+footer{color:var(--muted);font-size:12.5px;border-top:1px solid var(--line);padding-top:14px}
+
+@media (max-width:820px){
+  .paper,.bench{grid-template-columns:minmax(0,1fr)}
+  .log{min-height:200px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1>re<span>CRATE</span></h1>
+      <span class="tagline">Check the paper. Use the method. Keep the record.</span>
+    </div>
+    <span class="demo-note">Demo · fictional sample paper · simulated runs</span>
+  </header>
+
+  <section class="paper" aria-label="Paper and its crate">
+    <div>
+      <div class="label">Paper under review</div>
+      <p class="cite">A 12-gene expression score predicts response to immunotherapy in non-small-cell lung cancer</p>
+      <div class="meta">Rao, Mendes &amp; Okafor · 2025 · <span class="mono">doi:10.0000/sample.2025.0412</span> (sample)</div>
+      <p class="meta" style="margin-top:12px;max-width:60ch">The authors shipped an RO-Crate with their inputs, workflow, environment and the numbers they reported. reCRATE reads that crate and does the rest.</p>
+    </div>
+    <div>
+      <div class="label">Shipped crate</div>
+<div class="tree"><b>rao2025-crate/</b>
+├─ ro-crate-metadata.json   <i># what's inside, how it links</i>
+├─ workflow/Snakefile       <i># the analysis steps</i>
+├─ environment.yml          <i># pinned packages</i>
+├─ data/expr_counts.tsv.gz  <i># sha256 a3f9…c21e</i>
+├─ data/clinical.csv
+├─ <b>claims.json</b>              <i># paper number → output + tolerance</i>
+└─ <b>input-contract.json</b>      <i># what new data must look like</i></div>
+    </div>
+  </section>
+
+  <nav class="tabs" role="tablist" aria-label="Modes">
+    <button class="tab" role="tab" id="tab-repro" aria-selected="true" aria-controls="pane-repro">Reproduce<small>Can I trust this?</small></button>
+    <button class="tab" role="tab" id="tab-reuse" aria-selected="false" aria-controls="pane-reuse">Reuse<small>What does it say about my data?</small></button>
+    <button class="tab" role="tab" id="tab-record" aria-selected="false" aria-controls="pane-record">Record<small>What gets kept</small></button>
+  </nav>
+
+  <!-- REPRODUCE -->
+  <section id="pane-repro" role="tabpanel" aria-labelledby="tab-repro" class="wrap" style="gap:18px">
+    <div class="intro">
+      <p><strong>Paper's data → workflow → compare with the paper's numbers.</strong> Each claim is checked against a tolerance the authors declared before anything ran. The agent fixes setup problems and explains differences. It never decides a verdict.</p>
+      <div class="controls">
+        <label class="switch" for="tamper"><input type="checkbox" id="tamper"><span></span>Plant a wrong number in the paper</label>
+        <button class="btn" id="run-repro">Run reproduction</button>
+      </div>
+    </div>
+    <div class="bench">
+      <div class="panel">
+        <div class="panel-head"><h2>Run log</h2><span class="label" id="repro-status">Not run yet</span></div>
+        <div class="log" id="repro-log" aria-live="polite"><div class="empty">Press <strong>Run reproduction</strong>. Lines in blue are the agent; everything else is the deterministic runner.</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Claims from the paper</h2><div class="summary" id="repro-summary"><span class="pill">5 claims</span></div></div>
+        <div class="tbl-wrap"><table id="claims-table">
+          <thead><tr><th>Claim</th><th>Paper says</th><th>Rerun gives</th><th>Allowed</th><th>Verdict</th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+        <div id="explanations" style="display:grid;gap:10px"></div>
+        <div id="ledger-wrap" hidden>
+          <div class="label" style="margin-bottom:8px">Patch ledger · every change the agent made</div>
+          <div class="ledger" id="ledger"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REUSE -->
+  <section id="pane-reuse" role="tabpanel" aria-labelledby="tab-reuse" class="wrap" style="gap:18px" hidden>
+    <div class="intro">
+      <p><strong>Your data → same workflow → your results.</strong> The paper's own data is re-run alongside yours as a check that the pipeline still works today. Every change to your data is logged.</p>
+      <div class="controls">
+        <span class="mono" style="font-size:13px;color:var(--muted)">my_cohort.csv · 186 patients (sample)</span>
+        <button class="btn" id="run-reuse">Run on my data</button>
+      </div>
+    </div>
+    <div class="bench">
+      <div class="panel">
+        <div class="panel-head"><h2>Run log</h2><span class="label" id="reuse-status">Not run yet</span></div>
+        <div class="log" id="reuse-log" aria-live="polite"><div class="empty">Press <strong>Run on my data</strong> to apply the paper's method to a new cohort.</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h2>Does my data fit the method?</h2></div>
+        <div class="tbl-wrap"><table class="contract">
+          <thead><tr><th>Paper expects</th><th>Your data</th><th>Result</th></tr></thead>
+          <tbody id="contract-body">
+            <tr><td>Expression as log2 TPM</td><td>Raw counts</td><td><span class="verdict v-pend">Pending</span></td></tr>
+            <tr><td>Gene IDs as HGNC symbols</td><td>Ensembl IDs</td><td><span class="verdict v-pend">Pending</span></td></tr>
+            <tr><td>Tumour biopsy, pre-treatment</td><td>Tumour biopsy, pre-treatment</td><td><span class="verdict v-pend">Pending</span></td></tr>
+            <tr><td>Adults aged 18–75</td><td>Ages 16–81</td><td><span class="verdict v-pend">Pending</span></td></tr>
+          </tbody>
+        </table></div>
+        <div id="reuse-results" hidden style="display:grid;gap:12px">
+          <div class="label">Positive control</div>
+          <p class="explain" style="border-color:var(--ok)"><span class="who" style="color:var(--ok)">Paper's data, re-run today</span>All 5 claims still match. The pipeline is intact, so the results below come from a verified pipeline.</p>
+          <div class="label">Your results</div>
+          <div class="stats">
+            <div class="stat"><div class="n">61 / 186</div><div class="d">predicted responders (score ≥ 0.42, paper's cut-off)</div></div>
+            <div class="stat"><div class="n">0.79</div><div class="d">AUROC on your labels (95% CI 0.72–0.85); paper reported 0.871</div></div>
+            <div class="stat"><div class="n">9</div><div class="d">patients outside the paper's age range, flagged in the record</div></div>
+          </div>
+          <p class="explain warn"><span class="who">Agent note</span>Performance is lower than the paper's. Two likely reasons: your cohort is older on average (median 68 vs 61), and 9 patients fall outside the age range the method was tested on. Re-running without them gives AUROC 0.80, so age range alone doesn't explain the gap.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RECORD -->
+  <section id="pane-record" role="tabpanel" aria-labelledby="tab-record" class="wrap" style="gap:18px" hidden>
+    <div class="intro">
+      <p><strong>Every run is saved as an RO-Crate.</strong> It records inputs, environment, workflow, outputs, each claim's verdict and every change the agent made. A journal can attach it to the paper; a reuse record links back to the paper's crate.</p>
+      <div class="controls">
+        <span class="copy-status" id="copy-status"></span>
+        <button class="btn ghost" id="copy-json">Copy JSON</button>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2 class="mono" style="font-size:14px">ro-crate-metadata.json</h2><span class="label" id="record-label">Run a mode first</span></div>
+      <pre class="json" id="record-json"></pre>
+    </div>
+  </section>
+
+  <footer>Fictional paper, data and numbers for demonstration. Profiles referenced: RO-Crate 1.2, Workflow Run Crate 0.5. The claims manifest and input contract are proposed extensions.</footer>
+</div>
+
+<script>
+(function(){
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const wait = ms => new Promise(r => setTimeout(r, reduce ? 0 : ms));
+  const $ = id => document.getElementById(id);
+
+  const CLAIMS = [
+    {id:'C1', where:'Table 1', what:'Patients after quality control', expected:412, got:412, cmp:'exact', tol:0, dp:0},
+    {id:'C2', where:'Table 2', what:'AUROC, held-out set', expected:0.871, tampered:0.912, got:0.869, cmp:'abs', tol:0.005, dp:3},
+    {id:'C3', where:'Table 2', what:'Accuracy, held-out set', expected:0.812, got:0.815, cmp:'abs', tol:0.01, dp:3},
+    {id:'C4', where:'Figure 3b', what:'Hazard ratio, high vs low score', expected:2.41, got:2.43, cmp:'rel', tol:0.05, dp:2},
+    {id:'C5', where:'Table 3', what:'Interaction p-value', expected:0.0030, got:0.0036, cmp:'rel', tol:0.10, dp:4},
+  ];
+
+  const state = { tampered:false, running:false, repro:null, reuse:false, last:null };
+
+  function expectedOf(c){ return state.tampered && c.tampered != null ? c.tampered : c.expected; }
+  function tolText(c){
+    if(c.cmp==='exact') return 'exact';
+    if(c.cmp==='abs') return '± ' + c.tol;
+    return '± ' + Math.round(c.tol*100) + '%';
+  }
+  // Deterministic comparator: match within tolerance, near within 2x, otherwise mismatch.
+  function verdict(c){
+    const e = expectedOf(c), g = c.got;
+    let dev;
+    if(c.cmp==='exact') return e===g ? 'ok' : 'bad';
+    dev = c.cmp==='abs' ? Math.abs(g-e) : Math.abs(g-e)/Math.abs(e);
+    const eps = 1e-9;
+    if(dev <= c.tol + eps) return 'ok';
+    if(dev <= 2*c.tol + eps) return 'warn';
+    return 'bad';
+  }
+  const VLABEL = {ok:'Reproduced', warn:'Near · outside tolerance', bad:'Does not match', pend:'Pending'};
+
+  function renderClaims(){
+    const tb = document.querySelector('#claims-table tbody');
+    tb.innerHTML = '';
+    CLAIMS.forEach(c => {
+      const done = state.repro && state.repro.done.has(c.id);
+      const v = done ? verdict(c) : 'pend';
+      const tr = document.createElement('tr');
+      if(state.tampered && c.tampered != null) tr.className = 'tampered';
+      tr.innerHTML =
+        `<td><span class="mono" style="font-size:12px;color:var(--muted)">${c.id}</span> ${c.what}<span class="where">${c.where}</span></td>`+
+        `<td class="num exp">${expectedOf(c).toFixed(c.dp)}</td>`+
+        `<td class="num">${done ? c.got.toFixed(c.dp) : '—'}</td>`+
+        `<td class="num">${tolText(c)}</td>`+
+        `<td><span class="verdict v-${v}">${VLABEL[v]}</span></td>`;
+      tb.appendChild(tr);
+    });
+    renderSummary();
+  }
+
+  function renderSummary(){
+    const el = $('repro-summary');
+    if(!state.repro || state.repro.done.size < CLAIMS.length){ el.innerHTML = `<span class="pill">${CLAIMS.length} claims</span>`; return; }
+    const n = {ok:0,warn:0,bad:0};
+    CLAIMS.forEach(c => n[verdict(c)]++);
+    el.innerHTML =
+      `<span class="pill ok">${n.ok} reproduced</span>`+
+      (n.warn ? `<span class="pill warn">${n.warn} near</span>` : '')+
+      (n.bad ? `<span class="pill bad">${n.bad} mismatch</span>` : '');
+  }
+
+  function renderExplanations(){
+    const box = $('explanations');
+    box.innerHTML = '';
+    if(!state.repro || state.repro.done.size < CLAIMS.length) return;
+    CLAIMS.forEach(c => {
+      const v = verdict(c);
+      if(v==='ok') return;
+      const p = document.createElement('p');
+      p.className = 'explain ' + v;
+      if(c.id==='C5'){
+        p.innerHTML = `<span class="who">Agent explanation · C5</span>The permutation test in <span class="mono">analysis/stats.py</span> uses 1,000 permutations with no fixed seed, so this p-value moves between runs. Across 20 reruns: median 0.0031, range 0.0020–0.0042. The paper's value is plausible. Suggest the authors fix the seed or use more permutations.`;
+      } else if(c.id==='C2'){
+        p.innerHTML = `<span class="who">Agent explanation · C2</span>The workflow gives 0.869 on every rerun (seed is fixed). The paper reports ${expectedOf(c).toFixed(3)}. No environment change can explain a gap of ${(expectedOf(c)-c.got).toFixed(3)}. Flag for the reviewer: check how Table 2 was produced.`;
+      }
+      box.appendChild(p);
+    });
+  }
+
+  const LEDGER = [
+    {kind:'ENV', text:'Python 3.12 → 3.9', note:'scikit-learn 0.24.2 (pinned in environment.yml) has no build for 3.12. Analysis code untouched.'},
+    {kind:'ENV', text:'data/expr_counts.tsv.gz fetched from Zenodo mirror', note:'Original URL returned 404. Checksum matches the crate (sha256 a3f9…c21e).'},
+    {kind:'NONE', text:'No changes to analysis code or parameters', note:'Verdicts above are for the analysis exactly as the authors shipped it.'},
+  ];
+  function renderLedger(){
+    $('ledger-wrap').hidden = !(state.repro && state.repro.done.size === CLAIMS.length);
+    $('ledger').innerHTML = LEDGER.map(l =>
+      `<div class="ledger-row"><span class="kind ${l.kind==='NONE'?'none':''}">${l.kind==='NONE'?'ANALYSIS':l.kind}</span><p>${l.text}<small>${l.note}</small></p></div>`).join('');
+  }
+
+  function logLine(box, kind, text){
+    const tags = {run:'run', agent:'agent', ok:'ok', warn:'warn', err:'error'};
+    const d = document.createElement('div');
+    d.className = 'ln ' + kind;
+    d.innerHTML = `<span class="tag">${tags[kind]}</span><span class="txt">${text}</span>`;
+    box.appendChild(d);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  async function runRepro(){
+    if(state.running) return;
+    state.running = true; setButtons();
+    state.repro = {done:new Set()};
+    renderClaims(); renderExplanations(); renderLedger();
+    const box = $('repro-log'); box.innerHTML = '';
+    $('repro-status').textContent = 'Running…';
+    const L = (k,t,ms=380) => { logLine(box,k,t); return wait(ms); };
+
+    await L('run','Reading rao2025-crate/ro-crate-metadata.json');
+    await L('run','Profiles: Workflow RO-Crate · claims manifest v0.1 · input contract v0.1');
+    await L('run','Found 5 claims, 1 workflow (Snakemake), 2 data files');
+    await L('run','Creating environment from environment.yml…',600);
+    await L('err','scikit-learn==0.24.2: no build for Python 3.12');
+    await L('agent','Pinned 0.24.2 supports Python ≤ 3.9. Rebuilding env on Python 3.9 instead of changing the package version.',700);
+    await L('ok','Environment ready · logged as ENV fix #1');
+    await L('run','Fetching data/expr_counts.tsv.gz…',500);
+    await L('err','HTTP 404 at original URL');
+    await L('agent','Same file is listed in the paper’s Zenodo record. Downloading and checking sha256 against the crate.',700);
+    await L('ok','sha256 a3f9…c21e matches · logged as ENV fix #2');
+    await L('run','snakemake --cores 4  (6 rules)',500);
+    const steps = ['qc_filter','normalise','compute_score','train_eval','survival_model','interaction_test'];
+    for(const s of steps){ await L('run','  ✓ rule '+s, 260); }
+    await L('run','Comparing outputs with claims.json…',500);
+    for(const c of CLAIMS){
+      state.repro.done.add(c.id); renderClaims();
+      const v = verdict(c);
+      const k = v==='ok'?'ok':(v==='warn'?'warn':'err');
+      await L(k, `${c.id} ${c.where}: paper ${expectedOf(c).toFixed(c.dp)} · rerun ${c.got.toFixed(c.dp)} → ${VLABEL[v]}`, 420);
+    }
+    await L('agent','Explaining non-matching claims (verdicts unchanged).',500);
+    renderExplanations(); renderLedger();
+    await L('ok','Record written: repro-run-crate/ro-crate-metadata.json', 200);
+    const nBad = CLAIMS.filter(c=>verdict(c)==='bad').length;
+    $('repro-status').textContent = nBad ? 'Done · needs review' : 'Done';
+    state.last = 'repro';
+    state.running = false; setButtons(); renderRecord();
+  }
+
+  async function runReuse(){
+    if(state.running) return;
+    state.running = true; setButtons();
+    const box = $('reuse-log'); box.innerHTML = '';
+    $('reuse-results').hidden = true;
+    $('reuse-status').textContent = 'Running…';
+    const rows = $('contract-body').rows;
+    const setRow = (i,v,t) => { rows[i].cells[2].innerHTML = `<span class="verdict v-${v}">${t}</span>`; };
+    for(let i=0;i<rows.length;i++) setRow(i,'pend','Pending');
+    const L = (k,t,ms=380) => { logLine(box,k,t); return wait(ms); };
+
+    await L('run','Reading input-contract.json from rao2025-crate');
+    await L('run','Checking my_cohort.csv (186 rows, 20,412 columns)');
+    await L('agent','Values look like raw counts, not log2 TPM. Converting with the gene lengths shipped in the crate.',650);
+    setRow(0,'ok','Converted'); await L('ok','Conversion logged as DATA change #1');
+    await L('agent','Columns are Ensembl IDs. Mapping to HGNC symbols with the crate’s mapping table.',600);
+    setRow(1,'ok','12 of 12 mapped'); await L('ok','All 12 score genes found · DATA change #2');
+    setRow(2,'ok','Matches'); await L('ok','Sample type matches');
+    setRow(3,'warn','9 outside range'); await L('warn','9 patients outside ages 18–75 the method was tested on · flagged, not removed');
+    await L('run','Positive control: re-running paper’s data in the same environment…',700);
+    await L('ok','Paper data: 5 of 5 claims match today');
+    await L('run','Running workflow on my_cohort.csv (parameters unchanged from paper)…',700);
+    await L('ok','Score computed for 186 patients · 61 above cut-off 0.42');
+    await L('ok','Record written: reuse-run-crate/ro-crate-metadata.json (links to rao2025-crate)',200);
+    $('reuse-results').hidden = false;
+    $('reuse-status').textContent = 'Done';
+    state.reuse = true; state.last = 'reuse';
+    state.running = false; setButtons(); renderRecord();
+  }
+
+  function setButtons(){
+    $('run-repro').disabled = state.running;
+    $('run-reuse').disabled = state.running;
+    $('tamper').disabled = state.running;
+    $('run-repro').textContent = state.repro && state.repro.done.size===CLAIMS.length ? 'Run again' : 'Run reproduction';
+  }
+
+  // ---------- Record ----------
+  function buildRecord(){
+    const now = '2026-10-17T15:52:00+05:30';
+    const base = {
+      "@context":["https://w3id.org/ro/crate/1.2/context","https://w3id.org/ro/terms/workflow-run/context"],
+      "@graph":[]
+    };
+    const g = base["@graph"];
+    g.push({"@id":"ro-crate-metadata.json","@type":"CreativeWork","conformsTo":{"@id":"https://w3id.org/ro/crate/1.2"},"about":{"@id":"./"}});
+    if(state.last==='reuse'){
+      g.push({"@id":"./","@type":"Dataset","name":"Reuse run: rao2025 score on my_cohort","datePublished":now,
+        "conformsTo":[{"@id":"https://w3id.org/ro/wfrun/workflow/0.5"},{"@id":"#recrate-profile-0.1"}],
+        "isBasedOn":{"@id":"https://doi.org/10.0000/sample.2025.0412-crate"},
+        "mentions":[{"@id":"#run-control"},{"@id":"#run-user"}]});
+      g.push({"@id":"#run-control","@type":"CreateAction","name":"Positive control: paper data re-run","instrument":{"@id":"workflow/Snakefile"},"result":{"@id":"#control-verdict"}});
+      g.push({"@id":"#control-verdict","@type":"PropertyValue","name":"claims matched","value":"5/5"});
+      g.push({"@id":"#run-user","@type":"CreateAction","name":"Workflow on my_cohort.csv","instrument":{"@id":"workflow/Snakefile"},
+        "object":[{"@id":"my_cohort.csv"}],"result":[{"@id":"outputs/scores.csv"}],"endTime":now});
+      g.push({"@id":"my_cohort.csv","@type":"File","sha256":"7be1…04af","description":"User data; stored as checksum only"});
+      g.push({"@id":"#data-change-1","@type":"UpdateAction","name":"raw counts → log2 TPM","object":{"@id":"my_cohort.csv"}});
+      g.push({"@id":"#data-change-2","@type":"UpdateAction","name":"Ensembl IDs → HGNC symbols (12/12)","object":{"@id":"my_cohort.csv"}});
+      g.push({"@id":"#range-warning","@type":"PropertyValue","name":"outside validated age range","value":9});
+    } else {
+      g.push({"@id":"./","@type":"Dataset","name":"Reproduction of rao2025","datePublished":now,
+        "conformsTo":[{"@id":"https://w3id.org/ro/wfrun/workflow/0.5"},{"@id":"#recrate-profile-0.1"}],
+        "isBasedOn":{"@id":"https://doi.org/10.0000/sample.2025.0412-crate"},
+        "mentions":{"@id":"#run-1"}});
+      g.push({"@id":"#run-1","@type":"CreateAction","name":"Reproduce rao2025","instrument":{"@id":"workflow/Snakefile"},
+        "object":[{"@id":"data/expr_counts.tsv.gz"},{"@id":"data/clinical.csv"}],
+        "result":CLAIMS.map(c=>({"@id":"#verdict-"+c.id})),"endTime":now});
+      CLAIMS.forEach(c => g.push({"@id":"#verdict-"+c.id,"@type":"PropertyValue","name":c.id+" "+c.where+": "+c.what,
+        "expected":expectedOf(c),"observed":c.got,"tolerance":tolText(c),"verdict":VLABEL[verdict(c)]}));
+      g.push({"@id":"#env-fix-1","@type":"UpdateAction","additionalType":"environment","name":"Python 3.12 → 3.9"});
+      g.push({"@id":"#env-fix-2","@type":"UpdateAction","additionalType":"environment","name":"data fetched from Zenodo mirror; sha256 verified"});
+      g.push({"@id":"#analysis-changes","@type":"PropertyValue","name":"analysis code changes","value":0});
+    }
+    g.push({"@id":"#recrate-profile-0.1","@type":"Profile","name":"reCRATE claims + input contract (draft)"});
+    return base;
+  }
+
+  function highlight(json){
+    const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+    return esc(json)
+      .replace(/("(?:[^"\\]|\\.)*")(\s*:)/g,'<span class="k">$1</span>$2')
+      .replace(/(:\s*|\[\s*|,\s*)("(?:[^"\\]|\\.)*")/g,'$1<span class="s">$2</span>')
+      .replace(/(:\s*)(-?\d+(?:\.\d+)?)/g,'$1<span class="n">$2</span>');
+  }
+
+  let recordText = '';
+  function renderRecord(){
+    const pre = $('record-json');
+    if(!state.last){
+      pre.textContent = '// Run Reproduce or Reuse to generate a record.';
+      $('record-label').textContent = 'Run a mode first';
+      recordText = ''; return;
+    }
+    recordText = JSON.stringify(buildRecord(), null, 2);
+    pre.innerHTML = highlight(recordText);
+    $('record-label').textContent = state.last==='reuse' ? 'Reuse record' : (state.tampered ? 'Reproduction record · planted error' : 'Reproduction record');
+  }
+
+  $('copy-json').addEventListener('click', () => {
+    if(!recordText){ $('copy-status').textContent = 'Nothing to copy yet. Run a mode first.'; return; }
+    const done = () => { $('copy-status').textContent = 'Copied'; };
+    const fallback = () => {
+      const r = document.createRange(); r.selectNodeContents($('record-json'));
+      const s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+      $('copy-status').textContent = 'Selected. Press Ctrl/Cmd+C to copy.';
+    };
+    try { navigator.clipboard.writeText(recordText).then(done, fallback); } catch(e){ fallback(); }
+  });
+
+  // ---------- Tabs ----------
+  const tabs = ['repro','reuse','record'];
+  function show(name){
+    tabs.forEach(t => {
+      $('tab-'+t).setAttribute('aria-selected', t===name ? 'true':'false');
+      $('pane-'+t).hidden = t!==name;
+    });
+  }
+  tabs.forEach(t => $('tab-'+t).addEventListener('click', () => show(t)));
+  const h = (location.hash||'').slice(1);
+  if(tabs.includes(h)) show(h);
+
+  $('tamper').addEventListener('change', e => {
+    state.tampered = e.target.checked;
+    renderClaims(); renderExplanations();
+    if(state.last==='repro') renderRecord();
+    if(state.repro && state.repro.done.size===CLAIMS.length){
+      const nBad = CLAIMS.filter(c=>verdict(c)==='bad').length;
+      $('repro-status').textContent = nBad ? 'Done · needs review' : 'Done';
+    }
+  });
+  $('run-repro').addEventListener('click', runRepro);
+  $('run-reuse').addEventListener('click', runReuse);
+
+  renderClaims(); renderLedger(); renderRecord(); setButtons();
+})();
+</script>
+
+</body>
+</html>

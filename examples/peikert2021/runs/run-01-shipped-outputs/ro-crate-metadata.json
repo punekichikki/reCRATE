@@ -1,0 +1,365 @@
+{
+  "@context": [
+    "https://w3id.org/ro/crate/1.2/context",
+    "https://w3id.org/ro/terms/workflow-run/context",
+    {
+      "rc": "https://example.org/recrate/terms#",
+      "Claim": "http://schema.org/Claim",
+      "appearance": "http://schema.org/appearance"
+    }
+  ],
+  "@graph": [
+    {
+      "@id": "ro-crate-metadata.json",
+      "@type": "CreativeWork",
+      "conformsTo": {
+        "@id": "https://w3id.org/ro/crate/1.2"
+      },
+      "about": {
+        "@id": "./"
+      }
+    },
+    {
+      "@id": "./",
+      "@type": "Dataset",
+      "name": "Verification run: Paper crate: Peikert & Brandmaier (2021), reproducible R workflow",
+      "description": "Per-claim verdicts. Matches authors' recorded outputs (not re-executed): 5",
+      "datePublished": "2026-10-17T11:41:19+00:00",
+      "license": {
+        "@id": "https://spdx.org/licenses/MIT"
+      },
+      "conformsTo": [
+        {
+          "@id": "https://w3id.org/ro/wfrun/process/0.5"
+        },
+        {
+          "@id": "#recrate-profile"
+        }
+      ],
+      "isBasedOn": {
+        "@id": "#paper-crate"
+      },
+      "hasPart": [
+        {
+          "@id": "observed-shipped-3.5.0.json"
+        },
+        {
+          "@id": "observed-shipped-3.6.1.json"
+        },
+        {
+          "@id": "independent-I1.json"
+        }
+      ],
+      "mentions": [
+        {
+          "@id": "#action-1"
+        },
+        {
+          "@id": "#action-2"
+        },
+        {
+          "@id": "#check-I1"
+        },
+        {
+          "@id": "#verdict-C1"
+        },
+        {
+          "@id": "#verdict-C2"
+        },
+        {
+          "@id": "#verdict-C3"
+        },
+        {
+          "@id": "#verdict-C4"
+        },
+        {
+          "@id": "#verdict-C5"
+        }
+      ],
+      "rc:claimsSha256": "e30699ed85230468a91a7aac3c754cdde19c0bea885f7c9df8db054d2d8b0e8e",
+      "rc:claimsLocked": false,
+      "rc:unlockedReason": "no claims.lock.json"
+    },
+    {
+      "@id": "observed-shipped-3.5.0.json",
+      "@type": "File",
+      "encodingFormat": "application/json",
+      "sha256": "79b10d90e81eb7aa663ba0d3d55fb9327f297131106f47b233f4f512f272c20e",
+      "contentSize": "459"
+    },
+    {
+      "@id": "observed-shipped-3.6.1.json",
+      "@type": "File",
+      "encodingFormat": "application/json",
+      "sha256": "b8f5700d14eadc9f87a08eca20bd745bad477c1b048bc9ef3d5598dadae1e232",
+      "contentSize": "462"
+    },
+    {
+      "@id": "independent-I1.json",
+      "@type": "File",
+      "encodingFormat": "application/json",
+      "sha256": "7c1e49f1aa3868feea82323f3b916fb55a8089fe46941069da05310178a95e55",
+      "contentSize": "1134"
+    },
+    {
+      "@id": "#action-1",
+      "@type": "CreateAction",
+      "name": "Read authors' recorded outputs (r_version 3.5.0)",
+      "description": "Authors' recorded outputs: R/random35.md and data/bcis-3.5.0.csv (seed 2). Not re-executed.",
+      "actionStatus": {
+        "@id": "http://schema.org/CompletedActionStatus"
+      },
+      "object": {
+        "@id": "#paper-crate"
+      },
+      "result": {
+        "@id": "observed-shipped-3.5.0.json"
+      },
+      "environment": {
+        "@id": "#env-r_version-3.5.0"
+      },
+      "endTime": "2026-10-17T11:41:19+00:00"
+    },
+    {
+      "@id": "#action-2",
+      "@type": "CreateAction",
+      "name": "Read authors' recorded outputs (r_version 3.6.1)",
+      "description": "Authors' recorded outputs: R/random36.md and data/bcis-3.6.1.csv (seed 2). Not re-executed.",
+      "actionStatus": {
+        "@id": "http://schema.org/CompletedActionStatus"
+      },
+      "object": {
+        "@id": "#paper-crate"
+      },
+      "result": {
+        "@id": "observed-shipped-3.6.1.json"
+      },
+      "environment": {
+        "@id": "#env-r_version-3.6.1"
+      },
+      "endTime": "2026-10-17T11:41:19+00:00"
+    },
+    {
+      "@id": "#check-I1",
+      "@type": "CreateAction",
+      "additionalType": "rc:IndependentCheck",
+      "name": "Independent check I1 of claim C5",
+      "description": "Python re-implementation: OLS slope; SciPy BCa bootstrap, 1,000 resamples, 200 seeds",
+      "object": {
+        "@id": "#paper-crate"
+      },
+      "result": {
+        "@id": "independent-I1.json"
+      },
+      "rc:outcome": "fragile",
+      "rc:summary": "The slope is borderline (p = 0.058; classical CI -0.0072 to 0.4045). An independent BCa bootstrap excludes zero in 46% of 200 seeds. In the authors' own CSVs the CI excludes zero for 7/10 seeds under R 3.5.0 and 3/10 under R 3.6.1. The numbers do change with the R version, but whether the CI excludes zero depends on the seed in both versions.",
+      "endTime": "2026-10-17T11:41:19+00:00"
+    },
+    {
+      "@id": "#verdict-C1",
+      "@type": "PropertyValue",
+      "name": "C1: set.seed(1234); sample(1:10, 5) returns 2 6 5 8 9 under R 3.5.0",
+      "about": {
+        "@id": "#claim-C1"
+      },
+      "value": "matches-recorded-outputs",
+      "description": "Matches authors' recorded outputs (not re-executed)",
+      "rc:expectedValue": [
+        2,
+        6,
+        5,
+        8,
+        9
+      ],
+      "rc:observedValue": [
+        2,
+        6,
+        5,
+        8,
+        9
+      ],
+      "rc:tolerance": "exact match",
+      "rc:evidence": "observed-shipped-3.5.0.json",
+      "rc:detail": "identical"
+    },
+    {
+      "@id": "#verdict-C2",
+      "@type": "PropertyValue",
+      "name": "C2: set.seed(1234); sample(1:10, 5) returns 10 6 5 4 1 under R 3.6.1",
+      "about": {
+        "@id": "#claim-C2"
+      },
+      "value": "matches-recorded-outputs",
+      "description": "Matches authors' recorded outputs (not re-executed)",
+      "rc:expectedValue": [
+        10,
+        6,
+        5,
+        4,
+        1
+      ],
+      "rc:observedValue": [
+        10,
+        6,
+        5,
+        4,
+        1
+      ],
+      "rc:tolerance": "exact match",
+      "rc:evidence": "observed-shipped-3.6.1.json",
+      "rc:detail": "identical"
+    },
+    {
+      "@id": "#verdict-C3",
+      "@type": "PropertyValue",
+      "name": "C3: Bootstrap 95% BCa CI for the slope is 0.0097 to 0.3842 under R 3.5.0",
+      "about": {
+        "@id": "#claim-C3"
+      },
+      "value": "matches-recorded-outputs",
+      "description": "Matches authors' recorded outputs (not re-executed)",
+      "rc:expectedValue": [
+        0.0097,
+        0.3842
+      ],
+      "rc:observedValue": [
+        0.00965348571024079,
+        0.384222170634806
+      ],
+      "rc:tolerance": "equal after rounding to 4 decimals (as reported)",
+      "rc:evidence": "observed-shipped-3.5.0.json",
+      "rc:detail": "largest deviation = 0.93 x tolerance"
+    },
+    {
+      "@id": "#verdict-C4",
+      "@type": "PropertyValue",
+      "name": "C4: Bootstrap 95% BCa CI for the slope is -0.0005 to 0.3748 under R 3.6.1",
+      "about": {
+        "@id": "#claim-C4"
+      },
+      "value": "matches-recorded-outputs",
+      "description": "Matches authors' recorded outputs (not re-executed)",
+      "rc:expectedValue": [
+        -0.0005,
+        0.3748
+      ],
+      "rc:observedValue": [
+        -0.000525285590361554,
+        0.374808960052799
+      ],
+      "rc:tolerance": "equal after rounding to 4 decimals (as reported)",
+      "rc:evidence": "observed-shipped-3.6.1.json",
+      "rc:detail": "largest deviation = 0.506 x tolerance"
+    },
+    {
+      "@id": "#verdict-C5",
+      "@type": "PropertyValue",
+      "name": "C5: The CI excludes zero under R 3.5.0 but includes zero under R 3.6.1, so the conclusion changes with the R version",
+      "about": {
+        "@id": "#claim-C5"
+      },
+      "value": "matches-recorded-outputs",
+      "description": "Matches authors' recorded outputs (not re-executed)",
+      "rc:expectedValue": "lower(R 3.5.0) > 0 and lower(R 3.6.1) <= 0",
+      "rc:observedValue": "C3[0] = 0.00965349 > 0: True; C4[0] = -0.000525286 <= 0: True",
+      "rc:tolerance": "logical condition on C3 and C4",
+      "rc:evidence": "derived from C3, C4",
+      "rc:detail": "all conditions hold",
+      "rc:independentCheck": [
+        {
+          "@id": "#check-I1"
+        }
+      ]
+    },
+    {
+      "@id": "#env-r_version-3.5.0",
+      "@type": "SoftwareApplication",
+      "name": "r_version 3.5.0"
+    },
+    {
+      "@id": "#env-r_version-3.6.1",
+      "@type": "SoftwareApplication",
+      "name": "r_version 3.6.1"
+    },
+    {
+      "@id": "#claim-C1",
+      "@type": "Claim",
+      "identifier": "C1",
+      "name": "set.seed(1234); sample(1:10, 5) returns 2 6 5 8 9 under R 3.5.0",
+      "isPartOf": {
+        "@id": "#paper-crate"
+      }
+    },
+    {
+      "@id": "#claim-C2",
+      "@type": "Claim",
+      "identifier": "C2",
+      "name": "set.seed(1234); sample(1:10, 5) returns 10 6 5 4 1 under R 3.6.1",
+      "isPartOf": {
+        "@id": "#paper-crate"
+      }
+    },
+    {
+      "@id": "#claim-C3",
+      "@type": "Claim",
+      "identifier": "C3",
+      "name": "Bootstrap 95% BCa CI for the slope is 0.0097 to 0.3842 under R 3.5.0",
+      "isPartOf": {
+        "@id": "#paper-crate"
+      }
+    },
+    {
+      "@id": "#claim-C4",
+      "@type": "Claim",
+      "identifier": "C4",
+      "name": "Bootstrap 95% BCa CI for the slope is -0.0005 to 0.3748 under R 3.6.1",
+      "isPartOf": {
+        "@id": "#paper-crate"
+      }
+    },
+    {
+      "@id": "#claim-C5",
+      "@type": "Claim",
+      "identifier": "C5",
+      "name": "The CI excludes zero under R 3.5.0 but includes zero under R 3.6.1, so the conclusion changes with the R version",
+      "isPartOf": {
+        "@id": "#paper-crate"
+      }
+    },
+    {
+      "@id": "https://w3id.org/ro/wfrun/process/0.5",
+      "@type": "CreativeWork",
+      "name": "Process Run Crate",
+      "version": "0.5"
+    },
+    {
+      "@id": "#recrate-profile",
+      "@type": [
+        "CreativeWork",
+        "Profile"
+      ],
+      "name": "reCRATE profile (draft 0.1): claims, gaps, input contract, verdicts"
+    },
+    {
+      "@id": "#paper-crate",
+      "@type": "Dataset",
+      "name": "Paper crate: Peikert & Brandmaier (2021), reproducible R workflow",
+      "description": "Paper crate checked by this run. sha256 of its ro-crate-metadata.json: 86e21ad4870b5712e22f320557f58b711e40c8e2e72995b6587238ac842edc6c",
+      "isBasedOn": [
+        {
+          "@id": "https://doi.org/10.5964/qcmb.3763"
+        },
+        {
+          "@id": "https://github.com/aaronpeikert/reproducible-research"
+        }
+      ]
+    },
+    {
+      "@id": "#verifier",
+      "@type": "SoftwareApplication",
+      "name": "recrate.core.verify",
+      "softwareVersion": "0.1.0",
+      "description": "Python 3.13.16"
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/recrate/schemas/patch.schema.json",
+  "title": "Patches applied during execution",
+  "description": "Proposed by the Execution agent. The class is computed by recrate.core.classify, never by the agent.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": [
+      "file",
+      "reason"
+    ],
+    "properties": {
+      "file": {
+        "type": "string"
+      },
+      "reason": {
+        "type": "string"
+      },
+      "diff": {
+        "type": "string"
+      },
+      "class": {
+        "enum": [
+          "environment",
+          "analysis"
+        ],
+        "description": "Filled in by the verifier."
+      }
+    },
+    "additionalProperties": false
+  }
+}

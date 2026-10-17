@@ -1,0 +1,39 @@
+{
+  "check": "I1",
+  "about": "C5",
+  "method": "Python re-implementation: OLS slope; SciPy BCa bootstrap, 1,000 resamples, 200 seeds",
+  "environment": {
+    "python": "3.13.16",
+    "numpy": "2.5.3",
+    "scipy": "1.18.1"
+  },
+  "results": {
+    "n": 100,
+    "ols_slope": 0.1987,
+    "ols_p_value": 0.0584,
+    "t_ci_95": [
+      -0.0072,
+      0.4045
+    ],
+    "bca_runs": 200,
+    "bca_runs_excluding_zero": 91,
+    "bca_fraction_excluding_zero": 0.455,
+    "bca_lower_bound_q05_median_q95": [
+      -0.0191,
+      -0.001,
+      0.0147
+    ],
+    "authors_csv_seeds_excluding_zero": {
+      "3.5.0": {
+        "seeds": 10,
+        "excludes_zero": 7
+      },
+      "3.6.1": {
+        "seeds": 10,
+        "excludes_zero": 3
+      }
+    }
+  },
+  "outcome": "fragile",
+  "summary": "The slope is borderline (p = 0.058; classical CI -0.0072 to 0.4045). An independent BCa bootstrap excludes zero in 46% of 200 seeds. In the authors' own CSVs the CI excludes zero for 7/10 seeds under R 3.5.0 and 3/10 under R 3.6.1. The numbers do change with the R version, but whether the CI excludes zero depends on the seed in both versions."
+}

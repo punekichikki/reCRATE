@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.org/recrate/schemas/observed.schema.json",
+  "title": "Observed values from one run",
+  "description": "Written by the Execution stage (source: execution) or read from files the authors shipped (source: shipped-outputs). Never contains expected values.",
+  "type": "object",
+  "required": [
+    "source",
+    "environment"
+  ],
+  "properties": {
+    "source": {
+      "enum": [
+        "execution",
+        "shipped-outputs"
+      ]
+    },
+    "status": {
+      "enum": [
+        "ok",
+        "could-not-run"
+      ],
+      "default": "ok"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Why it could not run (required when status is could-not-run)."
+    },
+    "description": {
+      "type": "string"
+    },
+    "environment": {
+      "type": "object",
+      "description": "Keys matched against rc:requiresEnvironment, e.g. r_version."
+    },
+    "outputs": {
+      "type": "object"
+    },
+    "runner": {
+      "type": "object",
+      "description": "RunRecord from recrate.runners (local or hf-jobs)."
+    },
+    "endTime": {
+      "type": "string"
+    },
+    "evidenceFiles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "could-not-run"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "required": [
+          "reason"
+        ]
+      },
+      "else": {
+        "required": [
+          "outputs"
+        ]
+      }
+    }
+  ]
+}
